@@ -4,11 +4,17 @@ import Router from 'koa-router';
 import querystring from 'querystring';
 import fetch from 'node-fetch';
 import url from 'url';
-import crypto  from 'crypto';
+import crypto from 'crypto';
 import cors from 'koa-cors';
+import koaBody from 'koa-body';
+
 
 const router = new Router();
 const app = new Koa();
+let ticket = '';
+
+
+app.use(koaBody());
 app.use(cors());
 
 const OAPI_HOST = 'https://oapi.dingtalk.com';
@@ -17,6 +23,48 @@ const OAPI_HOST = 'https://oapi.dingtalk.com';
 
 import env from './env.js';
 const { corpid, corpsecret } = env;
+
+
+router.get('/token', async (ctx, next) => {
+  const res = await getToken();
+  ctx.body = res.access_token;
+});
+
+
+async function getToken() {
+  //获得访问钥匙  
+  let accessQs = querystring.stringify({
+    corpid,
+    corpsecret
+  });
+  let res = await fetch(`${OAPI_HOST}/gettoken?${accessQs}`, {
+    mode: 'cors'
+  });
+  res = await res.json();
+  return res;
+}
+
+
+async function getTicket(access_token) {
+  //获得门票  
+  let jsapiTicketQs = querystring.stringify({
+    type: 'jsapi',
+    'access_token': access_token
+  })
+  let res = await fetch(`${OAPI_HOST}/get_jsapi_ticket?${jsapiTicketQs}`, {
+    mode: 'cors'
+  });
+  res = await res.json();
+  return res;
+}
+
+router.get('/ticket', async (ctx, next) => {
+  let res = await getToken();
+  res = await getTicket(res.access_token);
+  ticket = res;
+  ctx.body = res;
+});
+
 
 router.get('/auth', async (ctx, next) => {
 
@@ -29,34 +77,16 @@ router.get('/auth', async (ctx, next) => {
     method: 'GET',
   };
 
-  //获得访问钥匙  
-  let accessQs = querystring.stringify({
-    corpid,
-    corpsecret
-  });
-  let res = await fetch(`${OAPI_HOST}/gettoken?${accessQs}`, {
-    mode: 'cors'
-  });
-  res = await res.json();
-  
-  const access_token = res.access_token;
 
-  //获得门票  
-  let jsapiTicketQs = querystring.stringify({
-    type: 'jsapi',
-    'access_token': access_token
-  })
-  res = await fetch(`${OAPI_HOST}/get_jsapi_ticket?${jsapiTicketQs}`, {
-    mode: 'cors'
-  });
-  res = await res.json();
+  let res = await getToken();
 
+  res = await getTicket(res.access_token);
   const ticket = res.ticket;
+
   let urlObj = url.parse(singedUrl);
   delete urlObj['hash'];
 
   let newUrl = url.format(urlObj);
-
 
   const str = `jsapi_ticket=${ticket}&noncestr=${noceStr}&timestamp=${timeStamp}$url=${newUrl}`;
 
@@ -64,6 +94,10 @@ router.get('/auth', async (ctx, next) => {
   sha1.update(str, 'utf8');
   let signature = sha1.digest('hex');
 
+
+  console.log(singQs);
+  console.log(ticket);
+  console.log(newUrl);
   ctx.body = {
     signature,
     noceStr,
@@ -71,6 +105,40 @@ router.get('/auth', async (ctx, next) => {
     corpid
   };
 });
+
+router.post('/signature', (ctx, next) => {
+
+
+
+  let ticket = ctx.request.body.ticket.trim();
+
+  let noceStr = 'abcdefg';
+  // let timeStamp = Date.now();
+  let timeStamp = 1500530398389;
+
+  let newUrl = decodeURIComponent(ctx.request.href);;
+  // newUrl = url.parse(newUrl);
+  // delete newUrl['hash'];
+  newUrl = url.format(newUrl);
+ 
+  const str = `jsapi_ticket=${ticket}&noncestr=${noceStr}&timestamp=${timeStamp}&url=${newUrl}`;  
+  
+
+
+  let sha1 = crypto.createHash('sha1');
+  sha1.update(str);
+  let signature = sha1.digest('hex');
+
+   ctx.body = {
+    signature,
+    noceStr,
+    timeStamp,
+    corpid
+  };
+
+});
+
+
 
 app
   .use(router.routes())
