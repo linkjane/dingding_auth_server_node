@@ -88,8 +88,12 @@ router.get('/auth', async (ctx, next) => {
 
   let newUrl = url.format(urlObj);
 
-  const str = `jsapi_ticket=${ticket}&noncestr=${noceStr}&timestamp=${timeStamp}$url=${newUrl}`;
-
+  const str = `jsapi_ticket=${ticket}&noncestr=${noceStr}&timestamp=${timeStamp}&url=${newUrl}`;
+ console.log(ticket);
+ console.log(timeStamp);
+ console.log(noceStr);
+ console.log(newUrl);
+ 
   let sha1 = crypto.createHash('sha1');
   sha1.update(str, 'utf8');
   let signature = sha1.digest('hex');
@@ -110,9 +114,9 @@ router.post('/signature', (ctx, next) => {
 
   let noceStr = 'abcdefg';
   // let timeStamp = Date.now();
-  let timeStamp = 1500530398389;
+  let timeStamp = 1500561141798;
 
-  let newUrl = decodeURIComponent(ctx.request.href);;
+  let newUrl = decodeURIComponent('http://localhost:3004/auth');
   // newUrl = url.parse(newUrl);
   // delete newUrl['hash'];
   newUrl = url.format(newUrl);
