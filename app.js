@@ -5,9 +5,11 @@ import querystring from 'querystring';
 import fetch from 'node-fetch';
 import url from 'url';
 import crypto  from 'crypto';
+import cors from 'cors';
 
 const router = new Router();
 const app = new Koa();
+app.use(cors());
 
 const OAPI_HOST = 'https://oapi.dingtalk.com';
 
@@ -57,9 +59,7 @@ router.get('/auth', async (ctx, next) => {
   let sha1 = crypto.createHash('sha1');
   sha1.update(str, 'utf8');
   let signature = sha1.digest('hex');
-  ctx.response.set('Access-Control-Allow-Origin', '*');
-  ctx.response.set('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-  ctx.response.set('Access-Control-Allow-Headers', 'Content-Type');
+
   ctx.body = {
     signature,
     noceStr,
