@@ -1,7 +1,6 @@
 
 import Koa from 'koa';
 import Router from 'koa-router';
-import logger from 'koa-logger';
 import querystring from 'querystring';
 import fetch from 'node-fetch';
 import url from 'url';
@@ -16,8 +15,6 @@ const OAPI_HOST = 'https://oapi.dingtalk.com';
 
 import env from './env.js';
 const { corpid, corpsecret } = env;
-
-app.use(logger());
 
 router.get('/auth', async (ctx, next) => {
 
