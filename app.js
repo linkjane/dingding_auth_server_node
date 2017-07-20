@@ -5,7 +5,7 @@ import querystring from 'querystring';
 import fetch from 'node-fetch';
 import url from 'url';
 import crypto  from 'crypto';
-import cors from 'cors';
+import cors from 'koa-cors';
 
 const router = new Router();
 const app = new Koa();
