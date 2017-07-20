@@ -81,7 +81,7 @@ router.get('/auth', async (ctx, next) => {
   let res = await getToken();
 
   res = await getTicket(res.access_token);
-  const ticket = res.ticket;
+  const ticket = res.ticket.trim();
 
   let urlObj = url.parse(singedUrl);
   delete urlObj['hash'];
@@ -94,10 +94,6 @@ router.get('/auth', async (ctx, next) => {
   sha1.update(str, 'utf8');
   let signature = sha1.digest('hex');
 
-
-  console.log(singQs);
-  console.log(ticket);
-  console.log(newUrl);
   ctx.body = {
     signature,
     noceStr,
