@@ -34,7 +34,9 @@ router.get('/auth', async (ctx, next) => {
     corpid,
     corpsecret
   });
-  let res = await fetch(`${OAPI_HOST}/gettoken?${accessQs}`);
+  let res = await fetch(`${OAPI_HOST}/gettoken?${accessQs}`, {
+    mode: 'cors'
+  });
   res = await res.json();
   
   const access_token = res.access_token;
@@ -44,7 +46,9 @@ router.get('/auth', async (ctx, next) => {
     type: 'jsapi',
     'access_token': access_token
   })
-  res = await fetch(`${OAPI_HOST}/get_jsapi_ticket?${jsapiTicketQs}`);
+  res = await fetch(`${OAPI_HOST}/get_jsapi_ticket?${jsapiTicketQs}`, {
+    mode: 'cors'
+  });
   res = await res.json();
 
   const ticket = res.ticket;
