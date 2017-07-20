@@ -57,11 +57,14 @@ router.get('/auth', async (ctx, next) => {
   let sha1 = crypto.createHash('sha1');
   sha1.update(str, 'utf8');
   let signature = sha1.digest('hex');
+  ctx.response.set('Access-Control-Allow-Origin', '*');
+  ctx.response.set('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  ctx.response.set('Access-Control-Allow-Headers', 'Content-Type');
   ctx.body = {
     signature,
     noceStr,
     timeStamp,
-    corpId
+    corpid
   };
 });
 
