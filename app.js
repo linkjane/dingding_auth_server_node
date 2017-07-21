@@ -38,7 +38,8 @@ async function getToken() {
     corpsecret
   });
   let res = await fetch(`${OAPI_HOST}/gettoken?${accessQs}`, {
-    mode: 'cors'
+    mode: 'cors',
+    cache: 'force-cache'
   });
   res = await res.json();
   return res;
@@ -52,7 +53,8 @@ async function getTicket(access_token) {
     'access_token': access_token
   })
   let res = await fetch(`${OAPI_HOST}/get_jsapi_ticket?${jsapiTicketQs}`, {
-    mode: 'cors'
+    mode: 'cors',
+    cache: 'force-cache'
   });
   res = await res.json();
   return res;
@@ -109,22 +111,20 @@ router.get('/auth', async (ctx, next) => {
 router.post('/signature', (ctx, next) => {
 
 
-
-  let ticket = ctx.request.body.ticket.trim();
-
+  let bodyData = JSON.parse(ctx.request.body);
+  let ticket = bodyData.ticket;
+ 
   let noceStr = 'abcdefg';
   // let timeStamp = Date.now();
-  let timeStamp = 1500561141798;
+  let timeStamp = Date.now();
 
-  let newUrl = decodeURIComponent('http://localhost:3004/auth');
+  let newUrl = decodeURIComponent(ctx.request.url);
   // newUrl = url.parse(newUrl);
   // delete newUrl['hash'];
   newUrl = url.format(newUrl);
  
   const str = `jsapi_ticket=${ticket}&noncestr=${noceStr}&timestamp=${timeStamp}&url=${newUrl}`;  
   
-
-
   let sha1 = crypto.createHash('sha1');
   sha1.update(str);
   let signature = sha1.digest('hex');
