@@ -128,7 +128,7 @@ router.post('/signature', (ctx, next) => {
   let sha1 = crypto.createHash('sha1');
   sha1.update(str);
   let signature = sha1.digest('hex');
-
+console.log(signature);
    ctx.body = {
     signature,
     noceStr,
@@ -138,6 +138,7 @@ router.post('/signature', (ctx, next) => {
 
 });
 
+//Fq5CoJa1kjxFMku1anMkhKv9wuYGOQ5OZ7xMdgmGEsMqCfWa1YomYdNAhREV5F2pimQD9jmnbicIOYfZGJoEzG
 
 
 app
