@@ -14,7 +14,7 @@ export default class Token {
 
     async getToken(url) {
         let now = Date.now();
-      console.log(now - this.last > 60 * 30 * 1000)
+  
         if (now - this.last > 60 * 30 * 1000) {
             let res = await fetch(url, {
                 mode: 'cors',
