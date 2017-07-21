@@ -51,10 +51,11 @@ router.post('/signature',async (ctx, next) => {
   let noceStr = Math.random().toString(36).substr(2);
   let timeStamp = Date.now();
 
-  let bodyUrl = ctx.request.body.url;
-  if ( typeof bodyUrl == 'string' ) {
-    bodyUrl = JSON.parse(bodyUrl);
+  let reqBody = ctx.request.body;
+  if ( typeof reqBody == 'string' ) {
+    reqBody = JSON.parse(reqBody);
   } 
+  let bodyUrl = reqBody.url;
   let newUrl = decodeURIComponent(bodyUrl);
   newUrl = url.parse(newUrl);
   delete newUrl['hash']; //必须删除url的hash部分
