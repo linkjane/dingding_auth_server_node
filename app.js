@@ -39,7 +39,6 @@ async function getToken() {
   });
   let res = await fetch(`${OAPI_HOST}/gettoken?${accessQs}`, {
     mode: 'cors',
-    cache: 'force-cache'
   });
   res = await res.json();
   return res;
@@ -54,7 +53,6 @@ async function getTicket(access_token) {
   })
   let res = await fetch(`${OAPI_HOST}/get_jsapi_ticket?${jsapiTicketQs}`, {
     mode: 'cors',
-    cache: 'force-cache'
   });
   res = await res.json();
   return res;
