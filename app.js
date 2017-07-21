@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import cors from 'koa-cors';
 import koaBody from 'koa-body';
 
+import Token from './token.js';
 
 const router = new Router();
 const app = new Koa();
@@ -25,109 +26,44 @@ import env from './env.js';
 const { corpid, corpsecret } = env;
 
 
-router.get('/token', async (ctx, next) => {
-  const res = await getToken();
-  ctx.body = res.access_token;
-});
-
-
-async function getToken() {
-  //获得访问钥匙  
-  let accessQs = querystring.stringify({
-    corpid,
-    corpsecret
-  });
-  let res = await fetch(`${OAPI_HOST}/gettoken?${accessQs}`, {
-    mode: 'cors',
-  });
-  res = await res.json();
-  return res;
-}
-
-
-async function getTicket(access_token) {
-  //获得门票  
-  let jsapiTicketQs = querystring.stringify({
-    type: 'jsapi',
-    'access_token': access_token
-  })
-  let res = await fetch(`${OAPI_HOST}/get_jsapi_ticket?${jsapiTicketQs}`, {
-    mode: 'cors',
-  });
-  res = await res.json();
-  return res;
-}
-
-router.get('/ticket', async (ctx, next) => {
-  let res = await getToken();
-  res = await getTicket(res.access_token);
-  ticket = res;
+router.get('/accesstoken',  async (ctx, next) => {
+ 
+  let res = await getAccessToken();
   ctx.body = res;
 });
 
 
-router.get('/auth', async (ctx, next) => {
-
-  let noceStr = 'abcdefg';
-  let timeStamp = Date.now();
-  //获得 请求url
-  let singedUrl = decodeURIComponent(ctx.request.href);
-
-  let initConfig = {
-    method: 'GET',
-  };
-
-
-  let res = await getToken();
-
-  res = await getTicket(res.access_token);
-  const ticket = res.ticket.trim();
-
-  let urlObj = url.parse(singedUrl);
-  delete urlObj['hash'];
-
-  let newUrl = url.format(urlObj);
-
-  const str = `jsapi_ticket=${ticket}&noncestr=${noceStr}&timestamp=${timeStamp}&url=${newUrl}`;
- console.log(ticket);
- console.log(timeStamp);
- console.log(noceStr);
- console.log(newUrl);
- 
-  let sha1 = crypto.createHash('sha1');
-  sha1.update(str, 'utf8');
-  let signature = sha1.digest('hex');
-
-  ctx.body = {
-    signature,
-    noceStr,
-    timeStamp,
-    corpid
-  };
+router.get('/ticket', async (ctx, next) => {
+    let res = await getTicket();
+  
+    ctx.body = res;
 });
 
-router.post('/signature', (ctx, next) => {
+
+router.post('/signature',async (ctx, next) => {
 
 
-  let bodyData = JSON.parse(ctx.request.body);
-  let ticket = bodyData.ticket;
-  console.log(ticket);
-  let noceStr = 'abcdefg';
-  // let timeStamp = Date.now();
-  let timeStamp = 1500606516117;
-  let getUrl = bodyData.url;
-  console.log(getUrl)
-  let newUrl = decodeURIComponent(getUrl);
+  let res = await getTicket();
+  let ticket = res.ticket;
+  console.log('ticket: ' + ticket);
+
+ 
+  let noceStr = Math.random().toString(36).substr(2);
+  let timeStamp = Date.now();
+
+  let bodyUrl = ctx.request.body.url;
+
+  let newUrl = decodeURIComponent(bodyUrl);
   newUrl = url.parse(newUrl);
-  delete newUrl['hash'];
+  delete newUrl['hash']; //必须删除url的hash部分
   newUrl = url.format(newUrl);
-  console.log(newUrl);
+
   const str = `jsapi_ticket=${ticket}&noncestr=${noceStr}&timestamp=${timeStamp}&url=${newUrl}`;  
   
   let sha1 = crypto.createHash('sha1');
   sha1.update(str);
   let signature = sha1.digest('hex');
-console.log(signature);
+
    ctx.body = {
     signature,
     noceStr,
@@ -137,8 +73,33 @@ console.log(signature);
 
 });
 
-//Fq5CoJa1kjxFMku1anMkhKv9wuYGOQ5OZ7xMdgmGEsMqCfWa1YomYdNAhREV5F2pimQD9jmnbicIOYfZGJoEzG
 
+//获得accesskey
+async function getAccessToken() {
+ let accessQs = querystring.stringify({
+    corpid,
+    corpsecret
+  });
+  const url = `${OAPI_HOST}/gettoken?${accessQs}`;
+
+  let res =  await Token.getInstance('accessToken').getToken(url);
+  // console.log('accessToken:  ' +  res.access_token);  
+  return res;
+}
+
+//获得ticket
+async function getTicket() {
+
+  let res = await getAccessToken();
+  let jsapiTicketQs = querystring.stringify({
+    type: 'jsapi',
+    'access_token': res.access_token
+  });
+  const url = `${OAPI_HOST}/get_jsapi_ticket?${jsapiTicketQs}`;
+  res =  await Token.getInstance('ticket').getToken(url);
+  // console.log('ticket:  ' + res.ticket);
+  return res;  
+}
 
 app
   .use(router.routes())
