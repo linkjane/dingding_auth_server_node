@@ -115,8 +115,8 @@ router.post('/signature', (ctx, next) => {
   let ticket = bodyData.ticket;
   console.log(ticket);
   let noceStr = 'abcdefg';
-  let timeStamp = Date.now();
-  // let timeStamp = 1500606516117;
+  // let timeStamp = Date.now();
+  let timeStamp = 1500606516117;
   let getUrl = bodyData.url;
   console.log(getUrl)
   let newUrl = decodeURIComponent(getUrl);
