@@ -113,16 +113,16 @@ router.post('/signature', (ctx, next) => {
 
   let bodyData = JSON.parse(ctx.request.body);
   let ticket = bodyData.ticket;
- 
+  console.log(ticket);
   let noceStr = 'abcdefg';
   // let timeStamp = Date.now();
-  let timeStamp = Date.now();
+  let timeStamp = 1500606516117;
 
-  let newUrl = decodeURIComponent(ctx.request.url);
+  let newUrl = decodeURIComponent(ctx.request.href);
   // newUrl = url.parse(newUrl);
   // delete newUrl['hash'];
   newUrl = url.format(newUrl);
- 
+ console.log(newUrl);
   const str = `jsapi_ticket=${ticket}&noncestr=${noceStr}&timestamp=${timeStamp}&url=${newUrl}`;  
   
   let sha1 = crypto.createHash('sha1');
