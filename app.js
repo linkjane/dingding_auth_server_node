@@ -72,9 +72,9 @@ router.post('/signature',async (ctx, next) => {
   ctx.body = {
       data: {
           signature,
-          noceStr,
+          nonceStr: noceStr,
           timeStamp,
-          corpid
+          corpId: corpid
       },
       error: false,
       success: true
