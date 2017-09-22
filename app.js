@@ -68,14 +68,17 @@ router.post('/signature',async (ctx, next) => {
   let signature = sha1.digest('hex');
 
   console.log(newUrl);
-  
-   ctx.body = {
-    signature,
-    noceStr,
-    timeStamp,
-    corpid
-  };
 
+  ctx.body = {
+      data: {
+          signature,
+          noceStr,
+          timeStamp,
+          corpid
+      },
+      error: false,
+      success: true
+  };
 });
 
 
